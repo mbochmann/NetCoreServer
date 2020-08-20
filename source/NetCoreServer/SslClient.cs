@@ -273,7 +273,8 @@ namespace NetCoreServer
                 try
                 {
                     // Shutdown the SSL stream
-                    _sslStream.ShutdownAsync().Wait();
+                    _sslStream.Close();
+                   // _sslStream.ShutdownAsync().Wait();
                 }
                 catch (Exception) {}
 

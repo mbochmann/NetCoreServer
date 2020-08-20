@@ -2,6 +2,8 @@
 using System.Text;
 using System.Security.Cryptography;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
 
 namespace NetCoreServer
 {
@@ -239,7 +241,9 @@ namespace NetCoreServer
 
             // WebSocket successfully handshaked!
             WsHandshaked = true;
-            Array.Fill(WsSendMask, (byte)0);
+            for (int i = 0; i < WsSendMask.Length; i++)
+                WsSendMask[i] = (byte)0;
+          //  Array.Fill(WsSendMask, (byte)0);
             _wsHandler.OnWsConnected(request);
 
             return true;
@@ -293,7 +297,7 @@ namespace NetCoreServer
 
             // Mask WebSocket frame content
             for (int i = 0; i < size; ++i)
-                WsSendBuffer[bufferOffset + i] = (byte) (buffer[offset + i] ^ WsSendMask[i % 4]);
+                WsSendBuffer[bufferOffset + i] = (byte)(buffer[offset + i] ^ WsSendMask[i % 4]);
         }
 
         /// <summary>
@@ -341,7 +345,7 @@ namespace NetCoreServer
                         }
                     }
 
-                    byte opcode = (byte) (WsReceiveBuffer[0] & 0x0F);
+                    byte opcode = (byte)(WsReceiveBuffer[0] & 0x0F);
                     bool fin = ((WsReceiveBuffer[0] >> 7) & 0x01) != 0;
                     bool mask = ((WsReceiveBuffer[1] >> 7) & 0x01) != 0;
                     int payload = WsReceiveBuffer[1] & (~0x80);
@@ -351,7 +355,7 @@ namespace NetCoreServer
                     {
                         WsHeaderSize = 2 + (mask ? 4 : 0);
                         WsPayloadSize = payload;
-                    WsReceiveBuffer.Capacity = WsHeaderSize + WsPayloadSize;
+                        WsReceiveBuffer.Capacity = WsHeaderSize + WsPayloadSize;
                     }
                     else if (payload == 126)
                     {
@@ -368,7 +372,7 @@ namespace NetCoreServer
                         payload = ((WsReceiveBuffer[2] << 8) | (WsReceiveBuffer[3] << 0));
                         WsHeaderSize = 4 + (mask ? 4 : 0);
                         WsPayloadSize = payload;
-                    WsReceiveBuffer.Capacity = WsHeaderSize + WsPayloadSize;
+                        WsReceiveBuffer.Capacity = WsHeaderSize + WsPayloadSize;
                     }
                     else if (payload == 127)
                     {
@@ -385,7 +389,7 @@ namespace NetCoreServer
                         payload = ((WsReceiveBuffer[2] << 56) | (WsReceiveBuffer[3] << 48) | (WsReceiveBuffer[4] << 40) | (WsReceiveBuffer[5] << 32) | (WsReceiveBuffer[6] << 24) | (WsReceiveBuffer[7] << 16) | (WsReceiveBuffer[8] << 8) | (WsReceiveBuffer[9] << 0));
                         WsHeaderSize = 10 + (mask ? 4 : 0);
                         WsPayloadSize = payload;
-                    WsReceiveBuffer.Capacity = WsHeaderSize + WsPayloadSize;
+                        WsReceiveBuffer.Capacity = WsHeaderSize + WsPayloadSize;
                     }
 
                     // Prepare WebSocket frame mask
@@ -407,7 +411,7 @@ namespace NetCoreServer
                     int length = Math.Min(total - WsReceiveBuffer.Count, (int)size);
 
                     // Prepare WebSocket frame payload
-                    WsReceiveBuffer.AddRange(buffer[((int)offset + index)..((int)offset + index + length)]);
+                    WsReceiveBuffer.AddRange(buffer.Skip(((int)offset + index)).Take(((int)length)));
                     index += length;
                     size -= length;
 
@@ -500,6 +504,31 @@ namespace NetCoreServer
                 Array.Clear(WsSendMask, 0, WsSendMask.Length);
             }
         }
+
+        public void OnWsConnecting(HttpRequest request) { }
+
+        public void OnWsConnected(HttpResponse response) { }
+
+        public bool OnWsConnecting(HttpRequest request, HttpResponse response) => true;
+
+        public void OnWsConnected(HttpRequest request) { }
+
+        public void OnWsDisconnected() { }
+
+        public void OnWsReceived(byte[] buffer, long offset, long size) { }
+
+        public void OnWsClose(byte[] buffer, long offset, long size) { }
+
+        public void OnWsPing(byte[] buffer, long offset, long size) { }
+
+        public void OnWsPong(byte[] buffer, long offset, long size) { }
+
+        public void OnWsError(string error) { }
+
+        public void OnWsError(SocketError error) { }
+
+
+        public void SendResponse(HttpResponse response) { }
 
         /// <summary>
         /// Handshaked flag

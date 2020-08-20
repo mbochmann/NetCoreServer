@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace NetCoreServer
@@ -82,7 +83,7 @@ namespace NetCoreServer
         /// <summary>
         /// Get the HTTP request body as byte array
         /// </summary>
-        public byte[] BodyBytes { get { return _cache.Data[_bodyIndex..(_bodyIndex + _bodySize)]; } }
+        public byte[] BodyBytes { get { return _cache.Data.Skip(_bodyIndex).Take(_bodySize).ToArray(); } }
         /// <summary>
         /// Get the HTTP request body as read-only byte span
         /// </summary>

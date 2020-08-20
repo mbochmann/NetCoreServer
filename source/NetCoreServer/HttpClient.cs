@@ -196,18 +196,18 @@ namespace NetCoreServer
         /// </summary>
         /// <param name="address">IP address</param>
         /// <param name="port">Port number</param>
-        public HttpClientEx(IPAddress address, int port) : base(address, port) {}
+        public HttpClientEx(IPAddress address, int port) : base(address, port) { }
         /// <summary>
         /// Initialize HTTP client with a given IP address and port number
         /// </summary>
         /// <param name="address">IP address</param>
         /// <param name="port">Port number</param>
-        public HttpClientEx(string address, int port) : base(address, port) {}
+        public HttpClientEx(string address, int port) : base(address, port) { }
         /// <summary>
         /// Initialize HTTP client with a given IP endpoint
         /// </summary>
         /// <param name="endpoint">IP endpoint</param>
-        public HttpClientEx(IPEndPoint endpoint) : base(endpoint) {}
+        public HttpClientEx(IPEndPoint endpoint) : base(endpoint) { }
 
         #region Send request
 
@@ -225,7 +225,8 @@ namespace NetCoreServer
         /// <returns>HTTP request Task</returns>
         public Task<HttpResponse> SendRequest(HttpRequest request, TimeSpan? timeout = null)
         {
-            timeout ??= TimeSpan.FromMinutes(1);
+            if (timeout == null)
+                timeout = TimeSpan.FromMinutes(1);
 
             _tcs = new TaskCompletionSource<HttpResponse>();
             Request = request;
